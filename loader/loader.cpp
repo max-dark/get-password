@@ -1,11 +1,7 @@
-#include <Windows.h>
+#include <windows.h>
+#include "hook.h"
 
-typedef void(*proc)(HINSTANCE xmod);
-
-bool hooked = false;
-HMODULE lib = 0;     // истанс библиотеки перехвата
-proc Init = NULL;    // указатель на инициализацию перехватчика
-proc Release = NULL; // свобождение перехватчика
+void ShowMessage(const std::string &message);
 
 void OutError() {
     LPVOID lpMsgBuf;
@@ -23,48 +19,19 @@ void OutError() {
     SetLastError(0);
 }
 
-
-void Hook(HWND parent) {
-    static const WCHAR modpath[] = L"gettext.dll";
-    if (!hooked) {
-        lib = LoadLibraryW(modpath);
-        if (!lib) goto eExit;
-        Init = (proc) GetProcAddress(lib, "Init");
-        if (!Init) goto eQuit;
-        Release = (proc) GetProcAddress(lib, "Release");
-        if (!Release) goto eQuit;
-        Init(lib);
-        hooked = true;
-    }
-    return;
-    eQuit:
-    FreeLibrary(lib);
-    Init = NULL;
-    Release = NULL;
-    hooked = false;
-    eExit:
-    MessageBeep(MB_ICONEXCLAMATION);
-    OutError();
-}
-
-
-void UnHook() {
-    if (hooked) {
-        Release(lib);
-        FreeLibrary(lib);
-        Init = NULL;
-        Release = NULL;
-        hooked = false;
-    }
-}
-
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nShowCmd) {
-    Hook(NULL);
-    if (hooked) {
-        MessageBoxW(NULL, L"Press Ok for exit", L"Get Text", MB_ICONINFORMATION);
+    try {
+        auto item = hook::setup("gettext.dll");
+        ShowMessage("Press Ok for exit");
     }
-    UnHook();
+    catch (std::exception &e) {
+        ShowMessage(e.what());
+    }
+
     return 0;
+}
+
+void ShowMessage(const std::string &message) {
+    MessageBoxA(NULL, message.c_str(), "Get Text", MB_ICONINFORMATION);
 }

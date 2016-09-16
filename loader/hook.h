@@ -16,7 +16,7 @@ public:
     using pointer = std::shared_ptr<hook>;
     using string = std::string;
 
-    pointer setup(const string &);
+    static pointer setup(const string &);
 
     ~hook();
 
