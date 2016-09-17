@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 project(get-password)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 set(SOURCE_FILES
         loader/hook.cpp
         loader/hook.h
@@ -10,6 +8,10 @@ set(SOURCE_FILES
         loader/library.h
         loader/loader.cpp)
 
-add_executable(get-password ${SOURCE_FILES})
+add_executable(get-password WIN32 ${SOURCE_FILES})
+set_target_properties(get-password PROPERTIES
+            CXX_STANDARD 11)
 add_library(gettext SHARED gettext/gettext.cpp)
-set_target_properties(gettext PROPERTIES PREFIX "")
+set_target_properties(gettext PROPERTIES
+            PREFIX ""
+            CXX_STANDARD 11)
