@@ -37,7 +37,7 @@ public:
         return ptr;
     }
 
-    HMODULE module() const { return m_instance; }
+    HMODULE module() const;
 
 private:
     HMODULE m_instance;
@@ -52,4 +52,3 @@ class library::MethodNotFoundException : public std::runtime_error {
 public:
     MethodNotFoundException(const string &message);
 };
-

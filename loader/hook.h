@@ -16,12 +16,20 @@ public:
     using pointer = std::shared_ptr<hook>;
     using string = std::string;
 
-    static pointer setup(const string &);
+    static pointer load(const string &);
 
     ~hook();
 
+    void initialize();
+
+    void release();
+
+    bool is_initialized() const;
+
 private:
     library::pointer m_library;
-    method m_init, m_release;
+    method m_init;
+    method m_release;
+    bool m_initialized;
 };
 

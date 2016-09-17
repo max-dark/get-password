@@ -2,23 +2,23 @@
 
 #pragma comment(linker,"/entry:DllMain")
 
-#define XHOOK_API __declspec(dllexport)
+#define HOOK_LIB_API __declspec(dllexport)
 
 extern "C"
 {
-XHOOK_API void Release(HINSTANCE xmod);
-XHOOK_API void Init(HINSTANCE xmod);
+HOOK_LIB_API void Release(HINSTANCE);
+HOOK_LIB_API void Init(HINSTANCE);
 };
 
-HINSTANCE xmod;
-HHOOK xhook;
+static HINSTANCE lib_instance = nullptr;
+static HHOOK hook_handle = nullptr;
 
 
 void GetStaredText(HWND wnd) {
     int len = GetWindowTextLengthW(wnd);
     WCHAR *buff = new WCHAR[len + 1];
     GetWindowTextW(wnd, buff, len + 1);
-    MessageBoxW(NULL, buff, L"", MB_ICONINFORMATION);
+    MessageBoxW(NULL, buff, L"press [ctrl+c] to copy text : Get Password tool", MB_ICONINFORMATION);
     delete[] buff;
 }
 
@@ -30,7 +30,7 @@ bool FilterMessage(PMSG msg) {
     return result;
 }
 
-LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK hook_function(int nCode, WPARAM wParam, LPARAM lParam) {
     PMSG msg = (PMSG) lParam;
     switch (nCode) {
         case HC_ACTION:
@@ -40,11 +40,11 @@ LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam) {
         default:
             break;
     }
-    return CallNextHookEx(xhook, nCode, wParam, lParam);
+    return CallNextHookEx(hook_handle, nCode, wParam, lParam);
 }
 
 
-void OutError() {
+void ShowLastError() {
     LPVOID lpMsgBuf;
     DWORD err = GetLastError();
     FormatMessageW(
@@ -54,29 +54,30 @@ void OutError() {
             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             (LPWSTR) &lpMsgBuf,
             0, NULL);
-    MessageBoxW(NULL, (LPWSTR) lpMsgBuf, L"Error", MB_ICONINFORMATION);
+    MessageBoxW(NULL, (LPWSTR) lpMsgBuf, L"Error is happened : Get Password tool", MB_ICONINFORMATION);
     LocalFree(lpMsgBuf);
     SetLastError(0);
 }
 
 BOOL WINAPI DllMain(HINSTANCE dll_instance, DWORD fdwReason, LPVOID) {
     if (fdwReason == DLL_PROCESS_ATTACH) {
-        xmod = dll_instance;
-        xhook = 0;
-        if (!xmod)
-            OutError();
+        lib_instance = dll_instance;
+        hook_handle = nullptr;
+        if (!lib_instance)
+            ShowLastError();
     }
     return TRUE;
 }
 
-XHOOK_API void Release(HINSTANCE) {
-    UnhookWindowsHookEx(xhook);
+HOOK_LIB_API void Release(HINSTANCE) {
+    UnhookWindowsHookEx(hook_handle);
+    hook_handle = nullptr;
 }
 
-XHOOK_API void Init(HINSTANCE xmod) {
-    xhook = SetWindowsHookExW(WH_GETMESSAGE, HookProc, xmod, 0);
-    if (!xhook) {
-        OutError();
+HOOK_LIB_API void Init(HINSTANCE lib) {
+    hook_handle = SetWindowsHookExW(WH_GETMESSAGE, hook_function, lib, 0);
+    if (!hook_handle) {
+        ShowLastError();
         MessageBeep(IDOK);
     }
 }

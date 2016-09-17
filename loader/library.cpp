@@ -3,7 +3,6 @@
 library::library(HMODULE instance) : m_instance(instance) {
 }
 
-
 library::pointer library::load(const string &file_name) {
     HMODULE instance = LoadLibraryA(file_name.c_str());
     if (!instance) {
@@ -11,6 +10,8 @@ library::pointer library::load(const string &file_name) {
     }
     return pointer(new library(instance));
 }
+
+HMODULE library::module() const { return m_instance; }
 
 library::~library() {
     FreeLibrary(m_instance);
