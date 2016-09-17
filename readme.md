@@ -1,7 +1,27 @@
-About
+О программе
 ---
-`get-password` is a small utility for recovering passwords
+Небольшая утилита для восстановления сохраненных паролей, скрытых звездочками.  
+Написана с использованием C++/WinAPI
 
-system requirements
+Системные требования:
 ---
-Windows XP or above with [vcredist2013](https://www.microsoft.com/ru-RU/download/details.aspx?id=40784) installed
+* Windows XP SP3 или выше
+* установленный [VCRedist-2013](https://www.microsoft.com/ru-RU/download/details.aspx?id=40784)
+
+Как использовать:
+---
+ 1. запускаете утилиту
+ 2. запускаете программу, из которой надо вытащить пароль
+ 3. ставите фокус ввода на поле с паролем
+ 4. крутаните колесо мыши
+ 5. появится окно с вашим паролем, в котором можно нажать `ctrl+c` для копирования
+
+Ограничения:
+---
+* работает только с полями ввода поддерживающими `GetWindowTextLengthW/GetWindowTextW`
+* под 64хбитной ОС разрядность запускаемой версии утилиты должна совпадать с разрядностью программы
+из которой вытаскиваете пароль.
+
+Исходныу код:
+---
+Можно посмотреть на [github](https://github.com/max-dark/get-password)
